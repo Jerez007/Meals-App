@@ -1,44 +1,54 @@
 import { StyleSheet, FlatList, View } from "react-native";
-import { MEALS } from "../data/dummy-data";
+import { CATEGORIES, MEALS } from "../data/dummy-data";
 import MealItem from "../components/MealItem";
+import { useLayoutEffect } from "react";
 
-export default function MealsOverviewScreen({ route }) {
-  const catId = route.params.categoryId;
+export default function MealsOverviewScreen({ route, navigation }) {
+	const catId = route.params.categoryId;
 
-  const displayedMeals = MEALS.filter((mealItem) => {
-    return mealItem.categoryIds.indexOf(catId) >= 0;
-  });
+	const displayedMeals = MEALS.filter((mealItem) => {
+		return mealItem.categoryIds.indexOf(catId) >= 0;
+	});
 
-  function renderMealItem(itemData) {
-    const item = itemData.item;
+	// Changed useEffect to useLayoutEffect in order to run this effect simultaneously with component function execution
+	useLayoutEffect(() => {
+		const categoryTitle = CATEGORIES.find(
+			(category) => category.id === catId
+		).title;
 
-    const mealItemProps = {
-      title: item.title,
-      imageUrl: item.imageUrl,
-      affordability: item.affordability,
-      complexity: item.complexity,
-      duration: item.duration
-    };
+		navigation.setOptions({
+			title: categoryTitle,
+		});
+	}, [catId, navigation]);
 
-    return (
-      <MealItem {...mealItemProps} />
-    );
-  }
+	function renderMealItem(itemData) {
+		const item = itemData.item;
 
-  return (
-    <View style={styles.container}>
-      <FlatList
-        data={displayedMeals}
-        keyExtractor={(item) => item.id}
-        renderItem={renderMealItem}
-      />
-    </View>
-  );
+		const mealItemProps = {
+			title: item.title,
+			imageUrl: item.imageUrl,
+			affordability: item.affordability,
+			complexity: item.complexity,
+			duration: item.duration,
+		};
+
+		return <MealItem {...mealItemProps} />;
+	}
+
+	return (
+		<View style={styles.container}>
+			<FlatList
+				data={displayedMeals}
+				keyExtractor={(item) => item.id}
+				renderItem={renderMealItem}
+			/>
+		</View>
+	);
 }
 
 const styles = StyleSheet.create({
-  container: {
-    flex: 1,
-    padding: 16,
-  },
+	container: {
+		flex: 1,
+		padding: 16,
+	},
 });
